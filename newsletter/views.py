@@ -170,7 +170,7 @@ class NewsletterMixin(ProcessUrlDataMixin):
             Newsletter.on_site.all()
         )
         newsletter_slug = kwargs['newsletter_slug']
-
+        print Newsletter.on_site.all()
         self.newsletter = get_object_or_404(
             newsletter_queryset, slug=newsletter_slug,
         )

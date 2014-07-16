@@ -497,6 +497,7 @@ class Article(models.Model):
 
     title = models.CharField(max_length=200, verbose_name=_('title'))
     text = models.TextField(verbose_name=_('text'))
+    tag = models.CharField(max_length=200, verbose_name=_('tag'), blank=True, null=True)
 
     url = models.URLField(
         verbose_name=_('link'), blank=True, null=True
@@ -609,6 +610,36 @@ class Submission(models.Model):
                 self.message.newsletter.get_templates('message')
 
             for subscription in subscriptions:
+
+                filtered_articles = []
+                customer_record_found = False # If customer_record_found is False because
+                # this person isn't yet a customer, or doesn't have any purchased product, we're
+                # going to email him the entire newsletter.
+                try:
+                    # This section is in a try because if no customer or if a customer has no
+                    # purchased product, it can raise an exception.
+                    # Get all purchases for this subscriber
+                    # Each subscriber has only one customer record, so we use [0]
+                    customer_record = subscription.customer_set.all()[0]
+                    name_of_products_owned = [product.name for product in customer_record.products.all()]
+
+                    customer_record_found = True
+
+                    all_articles = self.message.articles.all()
+
+                    for article in all_articles:
+                        if article.tag.upper() in (name.upper() for name in name_of_products_owned):
+                            continue
+                        else:
+                            filtered_articles.append(article)
+                    if not filtered_articles: # This user doesn't have any relevant articles
+                        continue
+                except:
+                    pass
+
+                if not customer_record_found:
+                    filtered_articles = self.message.articles.all()
+
                 variable_dict = {
                     'subscription': subscription,
                     'site': Site.objects.get_current(),
@@ -617,7 +648,8 @@ class Submission(models.Model):
                     'newsletter': self.newsletter,
                     'date': self.publish_date,
                     'STATIC_URL': settings.STATIC_URL,
-                    'MEDIA_URL': settings.MEDIA_URL
+                    'MEDIA_URL': settings.MEDIA_URL,
+                    'articles': filtered_articles
                 }
 
                 unescaped_context = Context(variable_dict, autoescape=False)
