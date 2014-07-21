@@ -15,12 +15,12 @@ class CustomerAdmin(admin.ModelAdmin):
     """ List extensions """
     def queryset(self, request):
         qs = super(CustomerAdmin, self).queryset(request)
-        qs = qs.annotate(Count('products'))
+        qs = qs.annotate(Count('purchase'))
         return qs
 
     def number_of_products(self, obj):
-    	return obj.products.count()
-    number_of_products.admin_order_field = 'products__count'
+    	return obj.purchase_set.count()
+    number_of_products.admin_order_field = 'purchase__count'
 
 
 admin.site.register(Customer, CustomerAdmin)

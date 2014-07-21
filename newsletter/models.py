@@ -1,5 +1,6 @@
 import logging
 logger = logging.getLogger(__name__)
+import time, sys
 
 from django.db import models
 from django.db.models import permalink
@@ -212,7 +213,7 @@ class Subscription(models.Model):
     )
 
     name_field = models.CharField(
-        db_column='name', max_length=30, blank=True, null=True,
+        db_column='name', max_length=300, blank=True, null=True,
         verbose_name=_('name'), help_text=_('optional')
     )
 
@@ -609,7 +610,14 @@ class Submission(models.Model):
             (subject_template, text_template, html_template) = \
                 self.message.newsletter.get_templates('message')
 
+            temp_sent_count = 0
+            total_sent_count = 0
             for subscription in subscriptions:
+
+                if temp_sent_count >= 1000:
+                    print "\n... Sleeping..."
+                    time.sleep(3600)
+                    temp_sent_count = 0
 
                 filtered_articles = []
                 customer_record_found = False # If customer_record_found is False because
@@ -687,6 +695,10 @@ class Submission(models.Model):
                         {'subscription': subscription,
                          'error': e}
                     )
+                total_sent_count += 1
+                temp_sent_count += 1
+                sys.stdout.write("Sent %d of %d potential emails\r" % (total_sent_count, len(subscriptions)))
+                sys.stdout.flush()
 
             self.sent = True
 

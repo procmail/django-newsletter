@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.db.models import Count
 
 from .models import Product
+from purchase.models import Purchase
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -18,12 +19,12 @@ class ProductAdmin(admin.ModelAdmin):
 
     def queryset(self, request):
         qs = super(ProductAdmin, self).queryset(request)
-        qs = qs.annotate(Count('customer'))
+        qs = qs.annotate(Count('purchase'))
         return qs
 
     def number_of_purchases(self, obj):
-    	return obj.customer_set.count()
-    number_of_purchases.admin_order_field = 'customer__count'
+    	return obj.purchase_set.count()
+    number_of_purchases.admin_order_field = 'purchase__count'
 
 
 admin.site.register(Product, ProductAdmin)

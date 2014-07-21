@@ -9,28 +9,16 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding model 'Customer'
-        db.create_table(u'customers_customer', (
+        db.create_table(u'customer_customer', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['newsletter.Subscription'], null=True, blank=True)),
         ))
-        db.send_create_signal(u'customers', ['Customer'])
-
-        # Adding M2M table for field products on 'Customer'
-        m2m_table_name = db.shorten_name(u'customers_customer_products')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('customer', models.ForeignKey(orm[u'customers.customer'], null=False)),
-            ('product', models.ForeignKey(orm[u'products.product'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['customer_id', 'product_id'])
+        db.send_create_signal(u'customer', ['Customer'])
 
 
     def backwards(self, orm):
         # Deleting model 'Customer'
-        db.delete_table(u'customers_customer')
-
-        # Removing M2M table for field products on 'Customer'
-        db.delete_table(db.shorten_name(u'customers_customer_products'))
+        db.delete_table(u'customer_customer')
 
 
     models = {
@@ -70,10 +58,9 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        u'customers.customer': {
+        u'customer.customer': {
             'Meta': {'object_name': 'Customer'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'products': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['products.Product']", 'symmetrical': 'False'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['newsletter.Subscription']", 'null': 'True', 'blank': 'True'})
         },
         u'newsletter.newsletter': {
@@ -89,7 +76,7 @@ class Migration(SchemaMigration):
         },
         u'newsletter.subscription': {
             'Meta': {'unique_together': "(('user', 'email_field', 'newsletter'),)", 'object_name': 'Subscription'},
-            'activation_code': ('django.db.models.fields.CharField', [], {'default': "'51ec8860d5ff738fea09ab0558696ad58a88c9bc'", 'max_length': '40'}),
+            'activation_code': ('django.db.models.fields.CharField', [], {'default': "'4eb65afc53d36fd94e3f86d9fe9ca991025740a0'", 'max_length': '40'}),
             'create_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email_field': ('django.db.models.fields.EmailField', [], {'db_index': 'True', 'max_length': '75', 'null': 'True', 'db_column': "'email'", 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -102,13 +89,6 @@ class Migration(SchemaMigration):
             'unsubscribed': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
         },
-        u'products.product': {
-            'Meta': {'object_name': 'Product'},
-            'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '500'}),
-            'price': ('django.db.models.fields.DecimalField', [], {'null': 'True', 'max_digits': '6', 'decimal_places': '2', 'blank': 'True'})
-        },
         u'sites.site': {
             'Meta': {'ordering': "(u'domain',)", 'object_name': 'Site', 'db_table': "u'django_site'"},
             'domain': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -117,4 +97,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['customers']
+    complete_apps = ['customer']
