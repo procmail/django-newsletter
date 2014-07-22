@@ -614,7 +614,7 @@ class Submission(models.Model):
             total_sent_count = 0
             for subscription in subscriptions:
 
-                if temp_sent_count >= 1000:
+                if temp_sent_count >= 500:
                     print "\n... Sleeping..."
                     time.sleep(3600)
                     temp_sent_count = 0
@@ -640,9 +640,13 @@ class Submission(models.Model):
                             continue
                         else:
                             filtered_articles.append(article)
+		    	    print len(filtered_articles)
                     if not filtered_articles: # This user doesn't have any relevant articles
                         continue
-                except:
+		    if len(filtered_articles) <= 2: # if 2 or less, we skip. Opening para and closing para = 2
+			continue
+                except Exception, e:
+		    print str(e)
                     pass
 
                 if not customer_record_found:
