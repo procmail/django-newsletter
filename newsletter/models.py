@@ -614,9 +614,11 @@ class Submission(models.Model):
             total_sent_count = 0
             for subscription in subscriptions:
 
-                if temp_sent_count >= 500:
-                    print "\n... Sleeping..."
-                    time.sleep(3600)
+                # Sends 1000 in 60 minutes
+                if temp_sent_count >= 100:
+                    delay = 360
+                    print "\n... Sleeping for %d seconds..." % delay
+                    time.sleep(delay)
                     temp_sent_count = 0
 
                 filtered_articles = []
@@ -627,9 +629,13 @@ class Submission(models.Model):
                     # This section is in a try because if no customer or if a customer has no
                     # purchased product, it can raise an exception.
                     # Get all purchases for this subscriber
-                    # Each subscriber has only one customer record, so we use [0]
+                    # Each subscriber has only one customer record, so we use [0].
+                    # However, a subscriber may not have a customer record,
+                    # so this will raise an exception. We can just ignore this exception.
+                    # Everyone we email to IS already a customer. The way we import data is such
+                    # that customer records are created.
                     customer_record = subscription.customer_set.all()[0]
-                    name_of_products_owned = [product.name for product in customer_record.products.all()]
+                    name_of_products_owned = [purchase.product.name for purchase in customer_record.purchase_set.all()]
 
                     customer_record_found = True
 
@@ -640,13 +646,15 @@ class Submission(models.Model):
                             continue
                         else:
                             filtered_articles.append(article)
-		    	    print len(filtered_articles)
                     if not filtered_articles: # This user doesn't have any relevant articles
                         continue
-		    if len(filtered_articles) <= 2: # if 2 or less, we skip. Opening para and closing para = 2
-			continue
+                    # if there are only 2 messages or less, we skip.
+                    # The opening para and closing para = 2 messages.
+                    # This means there are no other messages other
+                    # than the opening and closing paragraphs.
+                    if len(filtered_articles) <= 2:
+                        continue
                 except Exception, e:
-		    print str(e)
                     pass
 
                 if not customer_record_found:
@@ -705,6 +713,8 @@ class Submission(models.Model):
                 sys.stdout.flush()
 
             self.sent = True
+            sys.stdout.write("Sent %d of %d potential emails\n" % (total_sent_count, len(subscriptions)))
+
 
         finally:
             self.sending = False
