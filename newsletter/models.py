@@ -652,7 +652,7 @@ class Submission(models.Model):
                     # The opening para and closing para = 2 messages.
                     # This means there are no other messages other
                     # than the opening and closing paragraphs.
-                    if len(filtered_articles) <= 2:
+                    if len(filtered_articles) <= 0:
                         continue
                 except Exception, e:
                     pass
